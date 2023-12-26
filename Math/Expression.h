@@ -1,5 +1,5 @@
 #pragma once
-#include "Framework/Text.h"
+#include "../Framework/Text.h"
 
 class Expression : public DynamicObject
 {

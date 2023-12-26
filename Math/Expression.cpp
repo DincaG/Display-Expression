@@ -5,7 +5,9 @@ Expression::Expression(const Text& _text)
     text = new Text{ _text };
     text->setParent(*this);
     text->setRelativePosition(50.f, 50.f);
-    setSize({ text->getTextLocalBounds().width, text->getSize().y });
+    text->setTextSize(100.f);
+    setSize({ text->getTextLocalBounds().width, text->getTextLocalBounds().height });
+    setFillColor(sf::Color::Transparent);
 }
 
 Expression::Expression() : text{ nullptr }
@@ -33,5 +35,9 @@ float Expression::Center() const
 
 void Expression::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
+    sf::Transform combinedTransform{ states.transform * sf::Transformable::getTransform() };
+    applyChanges(combinedTransform);
+
+    Shape::draw(target, combinedTransform);
     if (text) target.draw(*text, states);
 }

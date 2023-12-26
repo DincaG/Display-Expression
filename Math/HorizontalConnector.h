@@ -5,7 +5,7 @@ class HorizontalConnector : public Expression
 {
 public:
 
-	HorizontalConnector(const Expression& up, const Expression& down, const Text& connector);
+	HorizontalConnector(const Expression& left, const Expression& right, const Text& connector);
 	HorizontalConnector();
 	~HorizontalConnector();
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;

@@ -1,0 +1,202 @@
+#include <SFML/Graphics.hpp>
+#include "Framework/Text.h"
+#include "Framework/Button.h"
+#include "Framework/Utility.h"
+#include "Parser/Parser.h"
+#include "Math/Math.h"
+
+Expression* BuildExpression(Node* node, Text& textSettings)
+{
+	if (!node) throw "Null Node";
+
+	switch (node->token.type)
+	{
+		case Token::Type::Function:
+		{
+			Expression* exp{ BuildExpression(node->left, textSettings) };
+			textSettings.setTextString(node->token.string);
+			Function* fun{ new Function(textSettings, *exp) };
+			delete exp;
+
+			return fun;
+		}
+		case Token::Type::Operator:
+		{
+			Expression* left{ BuildExpression(node->left, textSettings) };
+			Expression* right{ BuildExpression(node->right, textSettings) };
+
+			if (node->token.string == "^")
+			{
+				textSettings.setTextString(node->token.string);
+				Exponent* exponent{ new Exponent(*left, *right) };
+				delete left;
+				delete right;
+
+				return exponent;
+			}
+
+			if (node->token.string == "/")
+			{
+				textSettings.setTextString(node->token.string);
+				Fraction* fraction{ new Fraction(*left, *right) };
+				delete left;
+				delete right;
+
+				return fraction;
+			}
+
+			if (node->token.string == "*")
+			{
+				textSettings.setTextString("");
+				if (node->left->token.string == "-" || node->left->token.string == "+")
+				{
+					Expression* temp{ left };
+					left = new Function(textSettings, *left);
+					delete temp;
+				}
+				if (node->right->token.string == "-" || node->right->token.string == "+")
+				{
+					Expression* temp{ right };
+					right = new Function(textSettings, *right);
+					delete temp;
+				}
+			}
+
+			textSettings.setTextString(node->token.string);
+			HorizontalConnector* con{ new HorizontalConnector(*left, *right, textSettings) };
+			delete left;
+			delete right;
+
+			return con;
+		}
+		case Token::Type::Constant:
+		case Token::Type::Variable:
+		{
+			textSettings.setTextString(node->token.string);
+			Expression* exp{ new Expression(textSettings) };
+
+			return exp;
+		}
+		default:
+		{
+			throw "Undefined Token";
+		}
+	}
+}
+
+int main()
+{
+	sf::ContextSettings settings;
+	settings.antialiasingLevel = 8;
+	sf::RenderWindow window(sf::VideoMode(1900, 1000), "Vizualizator de Formule", sf::Style::Default, settings);
+	window.setPosition({ 0,0 });
+	window.setFramerateLimit(60);
+
+	std::string expression{ "-sin(( 2 + 3 ) / 7 ^ x * log(y))" };
+	Node* root{ nullptr };
+
+	try
+	{
+		root = Parser::BuildAST(expression);
+	}
+	catch (const std::string& error)
+	{
+		std::cout << error;
+		return 0;
+	}
+	catch (const char* error)
+	{
+		std::cout << error;
+		return 0;
+	}
+
+	Text textSettings({ 0.f, 80.f }); //only the height matters
+	textSettings.setTextFont("Resources/Lora.ttf");
+	textSettings.setTextFillColor(sf::Color::Black);
+	textSettings.setFillColor(sf::Color::Transparent);
+	
+	Expression* exp{ BuildExpression(root, textSettings) };
+	exp->setParent(window);
+	exp->setRelativePosition(49.f, 50.f);
+
+	Text introduction{ textSettings };
+	introduction.setTextString("Reprezentarea grafica a expresiei");
+	introduction.setParent(window);
+	introduction.setRelativePosition(50.f, 15.f);
+
+	Text stringExpression{ textSettings };
+	stringExpression.setTextString(expression);
+	stringExpression.setParent(window);
+	stringExpression.setRelativePosition(50.f, 20.f);
+
+	Button container({ exp->getGlobalBounds().width + 80.f, exp->getGlobalBounds().height + 120.f });
+	container.setFillColor(sf::Color::Transparent);
+	container.setOutlineColor(sf::Color::Black);
+	container.setOutlineThickness(5.f);
+	container.setCornerRadius(0.f);
+	container.setPointCount(20);
+	container.setParent(window);
+	container.setRelativePosition(50.f, 50.f);
+	container.taskManager.setTaskContextData(&container);
+
+	auto in
+	{
+		[](float percentageComplete, void* taskContextData)
+		{
+			Button* container{ (Button*)taskContextData };
+
+			static DynamicObject initialValues;
+			if (percentageComplete == 0.f)
+			{
+				initialValues = *(DynamicObject*)container;
+			}
+			container->setCornerRadius(CubicInterpolation(initialValues.getCornerRadius(), -200.f, -200.f, 170.f, percentageComplete));
+		}
+	};
+	auto out
+	{
+		[](float percentageComplete, void* taskContextData)
+		{
+			Button* container{ (Button*)taskContextData };
+
+			static DynamicObject initialValues;
+			if (percentageComplete == 0.f)
+			{
+				initialValues = *(DynamicObject*)container;
+			}
+			container->setCornerRadius(CubicInterpolation(initialValues.getCornerRadius(), -100.f, -100.f, 0.f, percentageComplete));
+		}
+	};
+
+	while (window.isOpen())
+	{
+		sf::Event event;
+		while (window.pollEvent(event))
+		{
+			if (event.type == sf::Event::Closed)
+				window.close();
+			if (event.type == sf::Event::Resized)
+			{
+				sf::View view(sf::FloatRect(0, 0, (float)window.getSize().x, (float)window.getSize().y));
+				window.setView(view);
+			}
+		}
+
+		Scheduler::executeTasks();
+
+		if (container.taskManager.isEmpty())
+		{
+			if (container.getCornerRadius() == 170.f) container.taskManager.addTask(Time::Seconds(2.f), out);
+			else if (container.getCornerRadius() == 0.f) container.taskManager.addTask(Time::Seconds(3.f), in);
+		}
+
+		window.clear(sf::Color(204, 204, 255));
+		window.draw(introduction);
+		window.draw(stringExpression);
+		window.draw(container);
+		window.draw(*exp);
+		window.display();
+	}
+
+	return 0;
+}
