@@ -151,6 +151,7 @@ int main()
 				initialValues = *(DynamicObject*)container;
 			}
 			container->setCornerRadius(CubicInterpolation(initialValues.getCornerRadius(), -200.f, -200.f, 170.f, percentageComplete));
+			container->setRotation(CubicInterpolation(initialValues.getRotation(), -10.f, 25.f, -10.f, percentageComplete));
 		}
 	};
 	auto out
@@ -165,6 +166,7 @@ int main()
 				initialValues = *(DynamicObject*)container;
 			}
 			container->setCornerRadius(CubicInterpolation(initialValues.getCornerRadius(), -100.f, -100.f, 0.f, percentageComplete));
+			container->setRotation(CubicInterpolation(initialValues.getRotation(), 10.f, -25.f, 10.f, percentageComplete));
 		}
 	};
 
@@ -187,7 +189,7 @@ int main()
 		if (container.taskManager.isEmpty())
 		{
 			if (container.getCornerRadius() == 170.f) container.taskManager.addTask(Time::Seconds(2.f), out);
-			else if (container.getCornerRadius() == 0.f) container.taskManager.addTask(Time::Seconds(3.f), in);
+			else if (container.getCornerRadius() == 0.f) container.taskManager.addTask(Time::Seconds(2.f), in);
 		}
 
 		window.clear(sf::Color(204, 204, 255));
