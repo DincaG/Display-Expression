@@ -152,6 +152,9 @@ int main()
 			}
 			container->setCornerRadius(CubicInterpolation(initialValues.getCornerRadius(), -200.f, -200.f, 170.f, percentageComplete));
 			container->setRotation(CubicInterpolation(initialValues.getRotation(), -10.f, 25.f, -10.f, percentageComplete));
+
+			float scale{ CubicInterpolation(initialValues.getScale().x, 0.8f, 1.2f, 1.f, percentageComplete) };
+			container->setScale(scale, scale);
 		}
 	};
 	auto out
@@ -167,6 +170,9 @@ int main()
 			}
 			container->setCornerRadius(CubicInterpolation(initialValues.getCornerRadius(), -100.f, -100.f, 0.f, percentageComplete));
 			container->setRotation(CubicInterpolation(initialValues.getRotation(), 10.f, -25.f, 10.f, percentageComplete));
+
+			float scale{ CubicInterpolation(initialValues.getScale().x, 1.2f, 0.8f, 1.f, percentageComplete) };
+			container->setScale(scale, scale);
 		}
 	};
 
