@@ -21,7 +21,6 @@ file(GLOB_RECURSE SRC_MATH
 )
 
 add_executable(${PROJECT_NAME} main.cpp ${SRC_FRAMEWORK} ${SRC_PARSER} ${SRC_MATH})
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
 
 source_group("Framework" FILES ${SRC_FRAMEWORK})
 source_group("Parser" FILES ${SRC_PARSER})
