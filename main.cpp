@@ -27,7 +27,14 @@ Expression* BuildExpression(Node* node, Text& textSettings)
 
 			if (node->token.string == "^")
 			{
-				textSettings.setTextString(node->token.string);
+				if (node->left->token.type == Token::Type::Operator)
+				{
+					textSettings.setTextString("");
+					Expression* temp{ left };
+					left = new Function(textSettings, *left);
+					delete temp;
+				}
+
 				Exponent* exponent{ new Exponent(*left, *right) };
 				delete left;
 				delete right;
@@ -92,7 +99,7 @@ int main()
 	window.setPosition({ 0,0 });
 	window.setFramerateLimit(60);
 
-	std::string expression{ "-sin(( 2 + 3 ) / 7 ^ x * log(y))" };
+	std::string expression{ "-sin((( 2 + 3) * x) / 7 ^ x * (log(y) - 5/x)) / (sqrt(y*(x/2))+1) * 3" };
 	Node* root{ nullptr };
 
 	try
@@ -110,33 +117,36 @@ int main()
 		return 0;
 	}
 
-	Text textSettings({ 0.f, 80.f }); //only the height matters
+	float size{ 50.f };
+	Text textSettings({ 0.f, size }); //only the height matters
 	textSettings.setTextFont("Resources/Lora.ttf");
 	textSettings.setTextFillColor(sf::Color::Black);
 	textSettings.setFillColor(sf::Color::Transparent);
-	
+
 	Expression* exp{ BuildExpression(root, textSettings) };
 	exp->setParent(window);
-	exp->setRelativePosition(49.f, 50.f);
+	exp->setRelativePosition(50.f, 60.f);
 
 	Text introduction{ textSettings };
-	introduction.setTextString("Reprezentarea grafica a expresiei");
+	introduction.setSize({ 0.f, 80.f });
+	introduction.setTextString("Reprezentarea Grafica a Expresiei");
 	introduction.setParent(window);
 	introduction.setRelativePosition(50.f, 15.f);
 
 	Text stringExpression{ textSettings };
+	stringExpression.setSize({ 0.f, 80.f });
 	stringExpression.setTextString(expression);
 	stringExpression.setParent(window);
 	stringExpression.setRelativePosition(50.f, 20.f);
 
-	Button container({ exp->getGlobalBounds().width + 80.f, exp->getGlobalBounds().height + 120.f });
+	Button container({ exp->getGlobalBounds().width + 100.f, exp->getGlobalBounds().height + 130.f });
 	container.setFillColor(sf::Color::Transparent);
 	container.setOutlineColor(sf::Color::Black);
 	container.setOutlineThickness(5.f);
 	container.setCornerRadius(0.f);
 	container.setPointCount(20);
 	container.setParent(window);
-	container.setRelativePosition(50.f, 50.f);
+	container.setRelativePosition(50.f, 60.f);
 	container.taskManager.setTaskContextData(&container);
 
 	auto in
@@ -187,6 +197,16 @@ int main()
 			{
 				sf::View view(sf::FloatRect(0, 0, (float)window.getSize().x, (float)window.getSize().y));
 				window.setView(view);
+			}
+			if (event.type == sf::Event::MouseWheelScrolled)
+			{
+				size += event.mouseWheelScroll.delta * 2;
+				exp->SetTextSize(size);
+
+				float r{ container.getCornerRadius() };
+				container.setCornerRadius(0.f);
+				container.setSize({ exp->getGlobalBounds().width + 100.f, exp->getGlobalBounds().height + 130.f });
+				container.setCornerRadius(r);
 			}
 		}
 

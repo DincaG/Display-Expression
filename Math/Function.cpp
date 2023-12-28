@@ -8,26 +8,19 @@ Function::Function(const Text& _type, const Expression& _exp)
 	type = new Text{ _type };
 	type->setParent(*this);
 	type->setTextSize(100.f);
-	type->setSize({ type->getTextLocalBounds().width + type->getTextLocalBounds().height / 3.f, type->getGlobalBounds().height });
 
 	p1 = new Text(_type);
 	p1->setTextSize(100.f);
 	p1->setParent(*this);
 	p1->setTextString("(");
-	p1->setSize({ p1->getTextLocalBounds().width, p1->getTextLocalBounds().height });
-	p1->setScale(1.f, exp->getGlobalBounds().height / p1->getSize().y);
 
 	p2 = new Text(*p1);
 	p2->setTextString(")");
 
-	float height{ exp->getGlobalBounds().height };
-	float width{ type->getGlobalBounds().width + p1->getGlobalBounds().width * 2 + exp->getGlobalBounds().width };
-	setSize({ width, height });
+	setFillColor(sf::Color::Transparent);
+	textSize = exp->GetTextSize();
 
-	type->setPosition(type->getGlobalBounds().width / 2.f, exp->getGlobalBounds().height / 2.f );
-	p1->setPosition(type->getGlobalBounds().width + p1->getGlobalBounds().width / 2.f, p1->getGlobalBounds().height / 2.f);
-	exp->setPosition(width - p2->getGlobalBounds().width - exp->getGlobalBounds().width / 2.f, exp->getGlobalBounds().height / 2.f);
-	p2->setPosition(width - p2->getGlobalBounds().width / 2.f, p2->getGlobalBounds().height / 2.f);
+	CalculateLayout();
 }
 
 Function::Function() : type{ nullptr }, exp{ nullptr }, p1{ nullptr }, p2{ nullptr }
@@ -40,6 +33,11 @@ Function::~Function()
 	delete exp;
 	delete p1;
 	delete p2;
+}
+
+float Function::Center() const
+{
+	return type->getPosition().y;
 }
 
 void Function::CopyInto(Expression** expression) const
@@ -57,15 +55,45 @@ void Function::CopyInto(Expression** expression) const
 
 	exp->CopyInto(&((Function*)(*expression))->exp);
 	((Function*)(*expression))->exp->setParent(**expression);
+
+	((Function*)(*expression))->textSize = textSize;
 }
 
-float Function::Center() const
+void Function::SetTextSize(float size)
 {
-	return type->getPosition().y;
+	exp->SetTextSize(size);
+	type->setSize({ 0.f, size });
+	p1->setSize({ 0.f, size });
+	p2->setSize({ 0.f, size });
+	textSize = size;
+	CalculateLayout();
+}
+
+void Function::CalculateLayout()
+{
+	type->setSize({ type->getTextLocalBounds().width + textSize / 3.f, type->getGlobalBounds().height });
+
+	p1->setSize({ p1->getTextLocalBounds().width, p1->getTextLocalBounds().height });
+	p1->setScale(1.f, exp->getGlobalBounds().height / p1->getSize().y);
+	p2->setSize({ p2->getTextLocalBounds().width, p2->getTextLocalBounds().height });
+	p2->setScale(1.f, exp->getGlobalBounds().height / p2->getSize().y);
+
+	float height{ exp->getGlobalBounds().height };
+	float width{ type->getGlobalBounds().width + p1->getGlobalBounds().width * 2 + exp->getGlobalBounds().width };
+	setSize({ width, height });
+
+	type->setPosition(type->getGlobalBounds().width / 2.f, exp->getGlobalBounds().height / 2.f);
+	p1->setPosition(type->getGlobalBounds().width + p1->getGlobalBounds().width / 2.f, p1->getGlobalBounds().height / 2.f);
+	exp->setPosition(width - p2->getGlobalBounds().width - exp->getGlobalBounds().width / 2.f, exp->getGlobalBounds().height / 2.f);
+	p2->setPosition(width - p2->getGlobalBounds().width / 2.f, p2->getGlobalBounds().height / 2.f);
 }
 
 void Function::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
+	sf::Transform combinedTransform{ states.transform * sf::Transformable::getTransform() };
+	applyChanges(combinedTransform);
+
+	Shape::draw(target, combinedTransform);
 	target.draw(*type, states);
 	target.draw(*p1, states);
 	target.draw(*exp, states);

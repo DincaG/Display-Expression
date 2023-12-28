@@ -7,17 +7,17 @@ public:
 
 	Fraction(const Expression& up, const Expression& down);
 	Fraction();
-	~Fraction();
-	virtual void CopyInto(Expression** expression) const;
+	virtual ~Fraction();
 	virtual float Center() const;
-
-protected:
-
-	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+	virtual void CopyInto(Expression** expression) const;
+	virtual void SetTextSize(float size);
 
 private:
 
+	void CalculateLayout();
+	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
 	Expression* up;
 	Expression* down;
-	DynamicObject bar;
+	DynamicObject* bar;
 };

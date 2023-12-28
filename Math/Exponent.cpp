@@ -9,16 +9,10 @@ Exponent::Exponent(const Expression& _base, const Expression& _power)
 	power->setParent(*this);
 	power->setScale(0.6f, 0.6f);
 
-	sf::Vector2f baseSize{ base->getGlobalBounds().width, base->getGlobalBounds().height };
-	sf::Vector2f powerSize{ power->getGlobalBounds().width, power->getGlobalBounds().height };
-
-	float height{ baseSize.y + powerSize.y };
-	float width{ baseSize.x + powerSize.x };
-	setSize({ width, height });
 	setFillColor(sf::Color::Transparent);
-
-	power->setPosition(baseSize.x + powerSize.x / 2.f, powerSize.y / 2.f);
-	base->setPosition(baseSize.x / 2.f, powerSize.y + baseSize.y / 2.f);
+	textSize = base->GetTextSize();
+	
+	CalculateLayout();
 }
 
 Exponent::Exponent() : power{ nullptr }, base{ nullptr }
@@ -31,6 +25,11 @@ Exponent::~Exponent()
 	delete base;
 }
 
+float Exponent::Center() const
+{
+	return base->getPosition().y;
+}
+
 void Exponent::CopyInto(Expression** expression) const
 {
 	*expression = new Exponent;
@@ -41,11 +40,29 @@ void Exponent::CopyInto(Expression** expression) const
 
 	((Exponent*)(*expression))->power->setParent(**expression);
 	((Exponent*)(*expression))->base->setParent(**expression);
+
+	((Exponent*)(*expression))->textSize = textSize;
 }
 
-float Exponent::Center() const
+void Exponent::SetTextSize(float size)
 {
-	return base->getPosition().y;
+	base->SetTextSize(size);
+	power->SetTextSize(size);
+	textSize = size;
+	CalculateLayout();
+}
+
+void Exponent::CalculateLayout()
+{
+	sf::Vector2f baseSize{ base->getGlobalBounds().width, base->getGlobalBounds().height };
+	sf::Vector2f powerSize{ power->getGlobalBounds().width, power->getGlobalBounds().height };
+
+	float height{ baseSize.y + powerSize.y };
+	float width{ baseSize.x + powerSize.x };
+	setSize({ width, height });
+
+	power->setPosition(baseSize.x + powerSize.x / 2.f, powerSize.y / 2.f);
+	base->setPosition(baseSize.x / 2.f, powerSize.y + baseSize.y / 2.f);
 }
 
 void Exponent::draw(sf::RenderTarget& target, sf::RenderStates states) const

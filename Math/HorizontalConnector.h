@@ -7,14 +7,15 @@ public:
 
 	HorizontalConnector(const Expression& left, const Expression& right, const Text& connector);
 	HorizontalConnector();
-	~HorizontalConnector();
-	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
-
-protected:
-
+	virtual ~HorizontalConnector();
+	virtual float Center() const;
 	virtual void CopyInto(Expression** expression) const;
+	virtual void SetTextSize(float size);
 
 private:
+
+	void CalculateLayout();
+	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 	Expression* left;
 	Expression* right;

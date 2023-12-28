@@ -8,14 +8,18 @@ public:
 	Expression(const Text& text);
 	Expression();
 	virtual ~Expression();
-	virtual void CopyInto(Expression** expression) const;
 	virtual float Center() const;
+	virtual void CopyInto(Expression** expression) const;
+	virtual void SetTextSize(float size);
+	float GetTextSize() const;
 
 protected:
 
-	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+	float textSize;
 
 private:
+
+	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 	Text* text;
 };
