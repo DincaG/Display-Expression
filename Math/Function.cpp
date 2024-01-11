@@ -71,7 +71,9 @@ void Function::SetTextSize(float size)
 
 void Function::CalculateLayout()
 {
-	type->setSize({ type->getTextLocalBounds().width + textSize / 3.f, type->getGlobalBounds().height });
+	float padding{ textSize / 6.f };
+	float padding2{ type->getTextString() != "" ? padding : 0 };
+	type->setSize({ type->getTextLocalBounds().width, type->getGlobalBounds().height });
 
 	p1->setSize({ p1->getTextLocalBounds().width, p1->getTextLocalBounds().height });
 	p1->setScale(1.f, exp->getGlobalBounds().height / p1->getSize().y);
@@ -79,12 +81,12 @@ void Function::CalculateLayout()
 	p2->setScale(1.f, exp->getGlobalBounds().height / p2->getSize().y);
 
 	float height{ exp->getGlobalBounds().height };
-	float width{ type->getGlobalBounds().width + p1->getGlobalBounds().width * 2 + exp->getGlobalBounds().width };
+	float width{ type->getGlobalBounds().width + padding * 2.f + padding2 + p1->getGlobalBounds().width * 2 + exp->getGlobalBounds().width };
 	setSize({ width, height });
 
 	type->setPosition(type->getGlobalBounds().width / 2.f, exp->getGlobalBounds().height / 2.f);
-	p1->setPosition(type->getGlobalBounds().width + p1->getGlobalBounds().width / 2.f, p1->getGlobalBounds().height / 2.f);
-	exp->setPosition(width - p2->getGlobalBounds().width - exp->getGlobalBounds().width / 2.f, exp->getGlobalBounds().height / 2.f);
+	p1->setPosition(type->getGlobalBounds().width + padding2 + p1->getGlobalBounds().width / 2.f, p1->getGlobalBounds().height / 2.f);
+	exp->setPosition(width - p2->getGlobalBounds().width - padding - exp->getGlobalBounds().width / 2.f, exp->getGlobalBounds().height / 2.f);
 	p2->setPosition(width - p2->getGlobalBounds().width / 2.f, p2->getGlobalBounds().height / 2.f);
 }
 

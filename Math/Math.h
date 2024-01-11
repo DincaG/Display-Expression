@@ -3,3 +3,4 @@
 #include "HorizontalConnector.h"
 #include "Exponent.h"
 #include "Function.h"
+#include "SquareRoot.h"

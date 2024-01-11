@@ -1,4 +1,4 @@
-#include <SFML/Graphics.hpp>
+﻿#include <SFML/Graphics.hpp>
 #include "Framework/Text.h"
 #include "Framework/Button.h"
 #include "Framework/Utility.h"
@@ -14,10 +14,17 @@ Expression* BuildExpression(Node* node, Text& textSettings)
 		case Token::Type::Function:
 		{
 			Expression* exp{ BuildExpression(node->left, textSettings) };
+
+			if (node->token.string == "sqrt")
+			{
+				SquareRoot* sqrt{ new SquareRoot(*exp) };
+				delete exp;
+				return sqrt;
+			}
+
 			textSettings.setTextString(node->token.string);
 			Function* fun{ new Function(textSettings, *exp) };
 			delete exp;
-
 			return fun;
 		}
 		case Token::Type::Operator:
@@ -69,6 +76,17 @@ Expression* BuildExpression(Node* node, Text& textSettings)
 				}
 			}
 
+			if (node->token.string == "-")
+			{
+				if (node->right->token.string == "-" || node->right->token.string == "+")
+				{
+					textSettings.setTextString("");
+					Expression* temp{ right };
+					right = new Function(textSettings, *right);
+					delete temp;
+				}
+			}
+
 			textSettings.setTextString(node->token.string);
 			HorizontalConnector* con{ new HorizontalConnector(*left, *right, textSettings) };
 			delete left;
@@ -99,7 +117,7 @@ int main()
 	window.setPosition({ 0,0 });
 	window.setFramerateLimit(60);
 
-	std::string expression{ "-sin((( 2 + 3) * x) / 7 ^ x * (log(y) - 5/x)) / (sqrt(y*(x/2))+1) * 3" };
+	std::string expression{ "sqrt(-sin((( 20 + 3) * x) / 7 ^ x * (log(y) - 5/x)) / (sqrt(y*(x/2))+1) * 3)" };
 	Node* root{ nullptr };
 
 	try
@@ -201,6 +219,7 @@ int main()
 			if (event.type == sf::Event::MouseWheelScrolled)
 			{
 				size += event.mouseWheelScroll.delta * 2;
+				if (size < 0) size = 0;
 				exp->SetTextSize(size);
 
 				float r{ container.getCornerRadius() };

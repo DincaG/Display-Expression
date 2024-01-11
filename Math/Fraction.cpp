@@ -9,7 +9,6 @@ Fraction::Fraction(const Expression& _up, const Expression& _down)
 	down->setParent(*this);
 
 	bar = new DynamicObject;
-	bar->setCornerRadius(2.5f);
 	bar->setParent(*this);
 	bar->setFillColor(sf::Color::Black);
 
@@ -62,20 +61,22 @@ void Fraction::SetTextSize(float size)
 
 void Fraction::CalculateLayout()
 {
-	float padding{ 0.25f * textSize };
+	float padding{ textSize / 4.f };
+	float lineWidth{ textSize / 10.f };
 	sf::Vector2f upSize{ up->getGlobalBounds().width, up->getGlobalBounds().height };
 	sf::Vector2f downSize{ down->getGlobalBounds().width, down->getGlobalBounds().height };
 
-	float height{ downSize.y + upSize.y + padding * 2.f };
+	float height{ downSize.y + upSize.y + padding * 2.f + lineWidth };
 	float width{ downSize.x > upSize.x ? downSize.x : upSize.x };
 	width *= 1.25f;
 	setSize({ width, height });
 
-	bar->setSize({ width, textSize / 10.f });
+	bar->setCornerRadius(textSize / 20.f);
+	bar->setSize({ width, lineWidth });
 	bar->setPosition(width / 2.f, padding + upSize.y + bar->getSize().y / 2.f);
 
 	up->setPosition(width / 2.f, upSize.y / 2.f);
-	down->setPosition(width / 2.f, padding * 2.f + bar->getSize().y / 2.f + upSize.y + downSize.y / 2.f);
+	down->setPosition(width / 2.f, padding * 2.f + bar->getSize().y + upSize.y + downSize.y / 2.f);
 }
 
 void Fraction::draw(sf::RenderTarget& target, sf::RenderStates states) const
