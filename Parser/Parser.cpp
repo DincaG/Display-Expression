@@ -277,7 +277,25 @@ void Parser::ValidateTokens(std::vector<Token>& tokens)
 					tokens[i].string.erase(tokens[i].string.begin());
 				}
 
-				if (tokens[i].string == functions[j])
+				bool integral{ false };
+				if (tokens[i].string.size() >= 3)
+				{
+					if (tokens[i].string.substr(0, 3) == "int")
+					{
+						integral = true;
+						if (tokens[i].string.size() > 3)
+						{
+							std::string interval{ tokens[i].string.substr(3) };
+							if (interval.find("to") == std::string::npos) throw "Integral interval ill defined";
+
+							std::string higherBound{ interval.substr(interval.find("to") + 2) };
+							std::string lowerBound{ interval.substr(0, interval.find("to")) };
+							if(higherBound.empty() || lowerBound.empty()) throw "Integral interval ill defined";
+						}
+					}
+				}
+
+				if (tokens[i].string == functions[j] || integral)
 				{
 					tokens[i].type = Token::Type::Function;
 					if (i + 1 < tokens.size())
@@ -380,7 +398,8 @@ const std::vector<std::string> Parser::functions
 	"tan",
 	"log",
 	"ln",
-	"sqrt"
+	"sqrt",
+	"abs"
 };
 
 const std::vector<char> Parser::operators

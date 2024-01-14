@@ -1,7 +1,8 @@
 #pragma once
-#include "../Framework/Text.h"
+//#include "../Framework/Text.h"
+#include "../Framework/Button.h"
 
-class Expression : public DynamicObject
+class Expression : public Button
 {
 public:
 
@@ -12,6 +13,7 @@ public:
 	virtual void CopyInto(Expression** expression) const;
 	virtual void SetTextSize(float size);
 	float GetTextSize() const;
+	virtual void run();
 
 protected:
 

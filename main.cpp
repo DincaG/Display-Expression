@@ -22,10 +22,31 @@ Expression* BuildExpression(Node* node, Text& textSettings)
 				return sqrt;
 			}
 
+			if (node->token.string.size() >= 3)
+			{
+				if (node->token.string.substr(0, 3) == "int")
+				{
+					textSettings.setTextString("");
+					Text lowerBound{ textSettings };
+					Text upperBound{ textSettings };
+
+					if (node->token.string.size() > 3)
+					{
+						std::string interval{ node->token.string.substr(3) };
+						lowerBound.setTextString(interval.substr(0, interval.find("to")));
+						upperBound.setTextString(interval.substr(interval.find("to") + 2));
+					}
+
+					Integral* integral{ new Integral(lowerBound, upperBound, *exp) };
+					delete exp;
+					return integral;
+				}
+			}
+
 			textSettings.setTextString(node->token.string);
-			Function* fun{ new Function(textSettings, *exp) };
+			Function* function{ new Function(textSettings, *exp) };
 			delete exp;
-			return fun;
+			return function;
 		}
 		case Token::Type::Operator:
 		{
@@ -117,7 +138,8 @@ int main()
 	window.setPosition({ 0,0 });
 	window.setFramerateLimit(60);
 
-	std::string expression{ "sqrt(-sin((( 20 + 3) * x) / 7 ^ x * (log(y) - 5/x)) / (sqrt(y*(x/2))+1) * 3)" };
+	std::string expression{ "int0to5(sqrt(-sin((( 20 + 3) * x) / 7 ^ x * (log(y) - 5/x)) / (sqrt(y*(x/2))+1) * 3))" };
+	//std::string expression{ "int0to5(7^(sqrt(3)/5^2))" };
 	Node* root{ nullptr };
 
 	try
@@ -135,7 +157,7 @@ int main()
 		return 0;
 	}
 
-	float size{ 50.f };
+	float size{ 40.f };
 	Text textSettings({ 0.f, size }); //only the height matters
 	textSettings.setTextFont("Resources/Lora.ttf");
 	textSettings.setTextFillColor(sf::Color::Black);
@@ -157,7 +179,7 @@ int main()
 	stringExpression.setParent(window);
 	stringExpression.setRelativePosition(50.f, 20.f);
 
-	Button container({ exp->getGlobalBounds().width + 100.f, exp->getGlobalBounds().height + 130.f });
+	Button container({ exp->getGlobalBounds().width + 150.f, exp->getGlobalBounds().height + 200.f });
 	container.setFillColor(sf::Color::Transparent);
 	container.setOutlineColor(sf::Color::Black);
 	container.setOutlineThickness(5.f);
@@ -224,10 +246,11 @@ int main()
 
 				float r{ container.getCornerRadius() };
 				container.setCornerRadius(0.f);
-				container.setSize({ exp->getGlobalBounds().width + 100.f, exp->getGlobalBounds().height + 130.f });
+				container.setSize({ exp->getGlobalBounds().width + 150.f, exp->getGlobalBounds().height + 200.f });
 				container.setCornerRadius(r);
 			}
 		}
+		exp->run();
 
 		Scheduler::executeTasks();
 

@@ -68,14 +68,15 @@ void SquareRoot::CalculateLayout()
 	float padding{ textSize / 3.f };
 	float lineWidth{ textSize / 10.f };
 	float toRadians{ 3.14159f / 180.f };
-	float height{ exp->getGlobalBounds().height + padding + lineWidth };
+	sf::Vector2f expSize{ exp->getGlobalBounds().width, exp->getGlobalBounds().height };
+	float height{ expSize.y + padding + lineWidth };
 
 	l1->setCornerRadius(textSize / 20.f);
 	l1->setSize({ textSize / 3.f, lineWidth });
-	l1->setPosition(l1->getSize().x / 2.f, exp->getGlobalBounds().height / 2.f + padding + lineWidth);
+	l1->setPosition(l1->getSize().x / 2.f, expSize.y / 2.f + padding + lineWidth);
 
 	l2->setCornerRadius(textSize / 20.f);
-	l2->setSize({ textSize / 10.f, (exp->getGlobalBounds().height / 2.f) / cos(-20.f * toRadians) + lineWidth / 2.f});
+	l2->setSize({ textSize / 10.f, (expSize.y / 2.f) / cos(-20.f * toRadians) + lineWidth / 2.f});
 	l2->setRotation(-20.f);
 	l2->setPosition(l1->getSize().x + l2->getGlobalBounds().width / 2.f - lineWidth, l1->getPosition().y - lineWidth / 2.f + l2->getGlobalBounds().height / 2.f);
 
@@ -85,12 +86,12 @@ void SquareRoot::CalculateLayout()
 	l3->setPosition(l1->getSize().x + l2->getGlobalBounds().width + l3->getGlobalBounds().width / 2.f - lineWidth * 2.f, l3->getGlobalBounds().height / 2.f);
 
 	l4->setCornerRadius(textSize / 20.f);
-	l4->setSize({ exp->getGlobalBounds().width + lineWidth * 3.f, lineWidth });
+	l4->setSize({ expSize.x + lineWidth * 3.f, lineWidth });
 	l4->setPosition(l1->getSize().x + l2->getGlobalBounds().width + l3->getGlobalBounds().width + l4->getSize().x / 2.f - lineWidth * 3.f, lineWidth / 2.f);
 
-	exp->setPosition(l1->getSize().x + l2->getGlobalBounds().width + l3->getGlobalBounds().width + exp->getGlobalBounds().width / 2.f, lineWidth + padding + exp->getGlobalBounds().height / 2.f);
+	exp->setPosition(l1->getSize().x + l2->getGlobalBounds().width + l3->getGlobalBounds().width + expSize.x / 2.f, lineWidth + padding + expSize.y / 2.f);
 
-	float width{ l1->getSize().x + l2->getGlobalBounds().width + l3->getGlobalBounds().width + exp->getGlobalBounds().width };
+	float width{ l1->getSize().x + l2->getGlobalBounds().width + l3->getGlobalBounds().width + expSize.x };
 	setSize({ width, height });
 }
 
@@ -105,4 +106,9 @@ void SquareRoot::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	target.draw(*l2, states);
 	target.draw(*l3, states);
 	target.draw(*l4, states);
+}
+
+void SquareRoot::run()
+{
+	exp->run();
 }

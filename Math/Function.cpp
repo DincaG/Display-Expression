@@ -9,12 +9,12 @@ Function::Function(const Text& _type, const Expression& _exp)
 	type->setParent(*this);
 	type->setTextSize(100.f);
 
-	p1 = new Text(_type);
+	p1 = new Text{ _type };
 	p1->setTextSize(100.f);
 	p1->setParent(*this);
 	p1->setTextString("(");
 
-	p2 = new Text(*p1);
+	p2 = new Text{ *p1 };
 	p2->setTextString(")");
 
 	setFillColor(sf::Color::Transparent);
@@ -100,4 +100,9 @@ void Function::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	target.draw(*p1, states);
 	target.draw(*exp, states);
 	target.draw(*p2, states);
+}
+
+void Function::run()
+{
+	exp->run();
 }

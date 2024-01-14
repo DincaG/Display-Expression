@@ -7,10 +7,10 @@ Exponent::Exponent(const Expression& _base, const Expression& _power)
 
 	base->setParent(*this);
 	power->setParent(*this);
-	power->setScale(0.6f, 0.6f);
 
 	setFillColor(sf::Color::Transparent);
 	textSize = base->GetTextSize();
+	power->SetTextSize(textSize * 0.6f);
 	
 	CalculateLayout();
 }
@@ -47,7 +47,7 @@ void Exponent::CopyInto(Expression** expression) const
 void Exponent::SetTextSize(float size)
 {
 	base->SetTextSize(size);
-	power->SetTextSize(size);
+	power->SetTextSize(size * 0.6f);
 	textSize = size;
 	CalculateLayout();
 }
@@ -73,4 +73,10 @@ void Exponent::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	Shape::draw(target, combinedTransform);
 	target.draw(*power, states);
 	target.draw(*base, states);
+}
+
+void Exponent::run()
+{
+	power->run();
+	base->run();
 }

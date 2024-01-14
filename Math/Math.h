@@ -4,3 +4,4 @@
 #include "Exponent.h"
 #include "Function.h"
 #include "SquareRoot.h"
+#include "Integral.h"

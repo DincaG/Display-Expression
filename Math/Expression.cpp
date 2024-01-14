@@ -1,4 +1,6 @@
 #include "Expression.h"
+#include "../Framework/Utility.h"
+#include <random>
 
 Expression::Expression(const Text& _text)
 {
@@ -56,4 +58,30 @@ void Expression::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
     Shape::draw(target, combinedTransform);
     if (text) target.draw(*text, states);
+}
+
+
+std::mt19937 mt{ std::random_device{}() };
+std::uniform_int_distribution randNumber{ 0, 700 };
+void Expression::run()
+{
+    auto flip
+    {
+        [](float percentageComplete, void* taskContextData)
+        {
+            DynamicObject* object{ (DynamicObject*)taskContextData };
+
+            static DynamicObject initialValues;
+            if (percentageComplete == 0.f)
+            {
+                initialValues = *object;
+            }
+
+            object->setRotation(CubicInterpolation(initialValues.getRotation(), -90.f, 90.f, 360.f, percentageComplete));
+            float scale{ CubicInterpolation(initialValues.getScale().y, -4.f, 2.f, 1.f, percentageComplete) };
+            object->setScale(1.f, scale);
+        }
+    };
+    taskManager.setTaskContextData(this);
+    if (taskManager.isEmpty() && randNumber(mt) % 700 == 0) taskManager.addTask(Time::Seconds(1.5f), flip);
 }

@@ -90,3 +90,9 @@ void HorizontalConnector::draw(sf::RenderTarget& target, sf::RenderStates states
 	target.draw(*connector, states);
 	target.draw(*right, states);
 }
+
+void HorizontalConnector::run()
+{
+	left->run();
+	right->run();
+}
