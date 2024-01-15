@@ -91,8 +91,50 @@ void HorizontalConnector::draw(sf::RenderTarget& target, sf::RenderStates states
 	target.draw(*right, states);
 }
 
-void HorizontalConnector::run()
+void HorizontalConnector::RunAnimation()
 {
-	left->run();
-	right->run();
+	left->RunAnimation();
+	right->RunAnimation();
+
+	auto flip
+	{
+		[](float percentageComplete, void* taskContextData)
+		{
+			DynamicObject* object{ (DynamicObject*)taskContextData };
+	
+			static DynamicObject initialValues;
+			if (percentageComplete == 0.f)
+			{
+				initialValues = *object;
+			}
+	
+			float scale{ CubicInterpolation(initialValues.getScale().y, -4.f, 2.f, 1.f, percentageComplete) };
+			object->setScale(1.f, scale);
+		}
+	};
+	connector->taskManager.setTaskContextData(connector);
+	if (connector->taskManager.isEmpty() && randNumber(mt) % 700 == 0) connector->taskManager.addTask(Time::Seconds(1.5f), flip);
+
+	//auto flip2
+	//{
+	//	[](float percentageComplete, void* taskContextData)
+	//	{
+	//		DynamicObject* object{ (DynamicObject*)taskContextData };
+	//
+	//		static DynamicObject initialValues;
+	//		if (percentageComplete == 0.f)
+	//		{
+	//			initialValues = *object;
+	//		}
+	//
+	//		float scale{ CubicInterpolation(initialValues.getScale().x, -4.f, 2.f, 1.f, percentageComplete) };
+	//		object->setScale(scale, 1.f);
+	//	}
+	//};
+	//taskManager.setTaskContextData(this);
+	//if (taskManager.isEmpty())
+	//{
+	//	if (randNumber(mt) % 700 == 0) taskManager.addTask(Time::Seconds(1.5f), flip);
+	//	//if (randNumber(mt) % 600 == 0) taskManager.addTask(Time::Seconds(1.5f), flip2);
+	//}
 }

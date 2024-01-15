@@ -148,9 +148,48 @@ void Integral::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	target.draw(*p2, states);
 }
 
-void Integral::run()
+void Integral::RunAnimation()
 {
-	exp->run();
-	upperBound->run();
-	lowerBound->run();
+	exp->RunAnimation();
+	upperBound->RunAnimation();
+	lowerBound->RunAnimation();
+
+	auto flip
+	{
+		[](float percentageComplete, void* taskContextData)
+		{
+			DynamicObject* object{ (DynamicObject*)taskContextData };
+
+			static DynamicObject initialValues;
+			if (percentageComplete == 0.f)
+			{
+				initialValues = *object;
+			}
+
+			float scale{ CubicInterpolation(initialValues.getScale().x, -5.f, 3.f, 1.f, percentageComplete) };
+			object->setScale(scale, initialValues.getScale().y);
+		}
+	};
+	integral->taskManager.setTaskContextData(integral);
+	if (integral->taskManager.isEmpty() && randNumber(mt) % 300 == 0) integral->taskManager.addTask(Time::Seconds(1.f), flip);
+
+	auto flip2
+	{
+		[](float percentageComplete, void* taskContextData)
+		{
+			DynamicObject* object{ (DynamicObject*)taskContextData };
+
+			static DynamicObject initialValues;
+			if (percentageComplete == 0.f)
+			{
+				initialValues = *object;
+			}
+
+			object->setRotation(CubicInterpolation(initialValues.getRotation(), -50.f, 50.f, 0.f, percentageComplete));
+		}
+	};
+	p1->taskManager.setTaskContextData(p1);
+	if (p1->taskManager.isEmpty() && randNumber(mt) % 700 == 0) p1->taskManager.addTask(Time::Seconds(1.5f), flip2);
+	p2->taskManager.setTaskContextData(p2);
+	if (p2->taskManager.isEmpty() && randNumber(mt) % 700 == 0) p2->taskManager.addTask(Time::Seconds(1.5f), flip2);
 }

@@ -108,7 +108,7 @@ void SquareRoot::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	target.draw(*l4, states);
 }
 
-void SquareRoot::run()
+void SquareRoot::RunAnimation()
 {
-	exp->run();
+	exp->RunAnimation();
 }

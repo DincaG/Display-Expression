@@ -1,5 +1,4 @@
 ﻿#include <SFML/Graphics.hpp>
-#include "Framework/Text.h"
 #include "Framework/Button.h"
 #include "Framework/Utility.h"
 #include "Parser/Parser.h"
@@ -226,6 +225,7 @@ int main()
 		}
 	};
 
+	bool runAnimations{ false };
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -249,15 +249,22 @@ int main()
 				container.setSize({ exp->getGlobalBounds().width + 150.f, exp->getGlobalBounds().height + 200.f });
 				container.setCornerRadius(r);
 			}
+			if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
+			{
+				runAnimations = !runAnimations;
+			}
 		}
-		exp->run();
-
+		
 		Scheduler::executeTasks();
-
-		if (container.taskManager.isEmpty())
+		
+		if (runAnimations)
 		{
-			if (container.getCornerRadius() == 170.f) container.taskManager.addTask(Time::Seconds(2.f), out);
-			else if (container.getCornerRadius() == 0.f) container.taskManager.addTask(Time::Seconds(2.f), in);
+			exp->RunAnimation();
+			if (container.taskManager.isEmpty())
+			{
+				if (container.getCornerRadius() == 170.f) container.taskManager.addTask(Time::Seconds(2.f), out);
+				else if (container.getCornerRadius() == 0.f) container.taskManager.addTask(Time::Seconds(2.f), in);
+			}
 		}
 
 		window.clear(sf::Color(204, 204, 255));

@@ -90,8 +90,8 @@ void Fraction::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	target.draw(*down, states);
 }
 
-void Fraction::run()
+void Fraction::RunAnimation()
 {
-	up->run();
-	down->run();
+	up->RunAnimation();
+	down->RunAnimation();
 }

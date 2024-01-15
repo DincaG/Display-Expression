@@ -75,8 +75,8 @@ void Exponent::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	target.draw(*base, states);
 }
 
-void Exponent::run()
+void Exponent::RunAnimation()
 {
-	power->run();
-	base->run();
+	power->RunAnimation();
+	base->RunAnimation();
 }

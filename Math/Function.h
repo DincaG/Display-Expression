@@ -11,7 +11,7 @@ public:
 	virtual float Center() const;
 	virtual void CopyInto(Expression** expression) const;
 	virtual void SetTextSize(float size);
-	virtual void run();
+	virtual void RunAnimation();
 
 private:
 

@@ -1,6 +1,4 @@
 #include "Expression.h"
-#include "../Framework/Utility.h"
-#include <random>
 
 Expression::Expression(const Text& _text)
 {
@@ -60,10 +58,7 @@ void Expression::draw(sf::RenderTarget& target, sf::RenderStates states) const
     if (text) target.draw(*text, states);
 }
 
-
-std::mt19937 mt{ std::random_device{}() };
-std::uniform_int_distribution randNumber{ 0, 700 };
-void Expression::run()
+void Expression::RunAnimation()
 {
     auto flip
     {
@@ -77,7 +72,7 @@ void Expression::run()
                 initialValues = *object;
             }
 
-            object->setRotation(CubicInterpolation(initialValues.getRotation(), -90.f, 90.f, 360.f, percentageComplete));
+            object->setRotation(CubicInterpolation(initialValues.getRotation(), -90.f, 270.f, 360.f, percentageComplete));
             float scale{ CubicInterpolation(initialValues.getScale().y, -4.f, 2.f, 1.f, percentageComplete) };
             object->setScale(1.f, scale);
         }

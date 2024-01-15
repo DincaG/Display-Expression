@@ -1,8 +1,9 @@
 #pragma once
-//#include "../Framework/Text.h"
-#include "../Framework/Button.h"
+#include "../Framework/Text.h"
+#include "../Framework/Utility.h"
+#include <random>
 
-class Expression : public Button
+class Expression : public Text
 {
 public:
 
@@ -13,7 +14,7 @@ public:
 	virtual void CopyInto(Expression** expression) const;
 	virtual void SetTextSize(float size);
 	float GetTextSize() const;
-	virtual void run();
+	virtual void RunAnimation();
 
 protected:
 
@@ -25,3 +26,6 @@ private:
 
 	Text* text;
 };
+
+static std::mt19937 mt{ std::random_device{}() };
+static std::uniform_int_distribution randNumber{ 0, 700 };
