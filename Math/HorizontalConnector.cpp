@@ -135,6 +135,6 @@ void HorizontalConnector::RunAnimation()
 	//if (taskManager.isEmpty())
 	//{
 	//	if (randNumber(mt) % 700 == 0) taskManager.addTask(Time::Seconds(1.5f), flip);
-	//	//if (randNumber(mt) % 600 == 0) taskManager.addTask(Time::Seconds(1.5f), flip2);
+	//	if (randNumber(mt) % 600 == 0) taskManager.addTask(Time::Seconds(1.5f), flip2);
 	//}
 }

@@ -5,3 +5,4 @@
 #include "Function.h"
 #include "SquareRoot.h"
 #include "Integral.h"
+#include "Limit.h"

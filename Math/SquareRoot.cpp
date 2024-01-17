@@ -1,6 +1,6 @@
 #include "SquareRoot.h"
 
-SquareRoot::SquareRoot(const Expression& _exp)
+SquareRoot::SquareRoot(const Expression& _exp, const Text& _order)
 {
 	_exp.CopyInto(&exp);
 	exp->setParent(*this);
@@ -8,9 +8,12 @@ SquareRoot::SquareRoot(const Expression& _exp)
 	l1 = new DynamicObject;
 	l1->setParent(*this);
 	l1->setFillColor(sf::Color::Black);
-	l2 = new DynamicObject(*l1);
-	l3 = new DynamicObject(*l1);
-	l4 = new DynamicObject(*l1);
+	l2 = new DynamicObject{ *l1 };
+	l3 = new DynamicObject{ *l1 };
+	l4 = new DynamicObject{ *l1 };
+	order = new Text{ _order };
+	order->setTextSize(100.f);
+	order->setParent(*this);
 
 	setFillColor(sf::Color::Transparent);
 	textSize = exp->GetTextSize();
@@ -18,12 +21,15 @@ SquareRoot::SquareRoot(const Expression& _exp)
 	CalculateLayout();
 }
 
-SquareRoot::SquareRoot() : exp{ nullptr }, l1{ nullptr }, l2{ nullptr }, l3{ nullptr }, l4{ nullptr }
+SquareRoot::SquareRoot() 
+	: l1{ nullptr }, l2{ nullptr }, l3{ nullptr }, l4{ nullptr }
+	, order{ nullptr }, exp{ nullptr }
 {
 }
 
 SquareRoot::~SquareRoot()
 {
+	delete order;
 	delete exp;
 	delete l1;
 	delete l2;
@@ -49,6 +55,9 @@ void SquareRoot::CopyInto(Expression** expression) const
 	((SquareRoot*)(*expression))->l3->setParent(**expression);
 	((SquareRoot*)(*expression))->l4 = new DynamicObject{ *l4 };
 	((SquareRoot*)(*expression))->l4->setParent(**expression);
+
+	((SquareRoot*)(*expression))->order = new Text{ *order };
+	((SquareRoot*)(*expression))->order->setParent(**expression);
 
 	exp->CopyInto(&((SquareRoot*)(*expression))->exp);
 	((SquareRoot*)(*expression))->exp->setParent(**expression);
@@ -91,6 +100,9 @@ void SquareRoot::CalculateLayout()
 
 	exp->setPosition(l1->getSize().x + l2->getGlobalBounds().width + l3->getGlobalBounds().width + expSize.x / 2.f, lineWidth + padding + expSize.y / 2.f);
 
+	order->setSize({ order->getSize().x, textSize * 0.7f });
+	order->setPosition(l1->getPosition().x, l1->getPosition().y - order->getGlobalBounds().height / 2.f - lineWidth);
+
 	float width{ l1->getSize().x + l2->getGlobalBounds().width + l3->getGlobalBounds().width + expSize.x };
 	setSize({ width, height });
 }
@@ -101,6 +113,7 @@ void SquareRoot::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	applyChanges(combinedTransform);
 
 	Shape::draw(target, combinedTransform);
+	target.draw(*order, states);
 	target.draw(*exp, states);
 	target.draw(*l1, states);
 	target.draw(*l2, states);

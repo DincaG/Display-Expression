@@ -3,6 +3,7 @@
 Expression::Expression(const Text& _text)
 {
     text = new Text{ _text };
+    if (text->getTextString() == "pi") text->setTextString(L"\u03C0");
     text->setParent(*this);
     text->setRelativePosition(50.f, 50.f);
     text->setTextSize(100.f);

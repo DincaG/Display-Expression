@@ -3,6 +3,7 @@
 #include "Framework/Utility.h"
 #include "Parser/Parser.h"
 #include "Math/Math.h"
+#include <fstream>
 
 Expression* BuildExpression(Node* node, Text& textSettings)
 {
@@ -14,11 +15,80 @@ Expression* BuildExpression(Node* node, Text& textSettings)
 		{
 			Expression* exp{ BuildExpression(node->left, textSettings) };
 
-			if (node->token.string == "sqrt")
+			bool negative{ false };
+			if (node->token.string[0] == '-')
 			{
-				SquareRoot* sqrt{ new SquareRoot(*exp) };
-				delete exp;
-				return sqrt;
+				negative = true;
+				node->token.string.erase(node->token.string.begin());
+			}
+
+			if (node->token.string.size() >= 4)
+			{
+				if (node->token.string.substr(0, 4) == "sqrt")
+				{
+					textSettings.setTextString("");
+					if (node->token.string.size() > 4)
+					{
+						textSettings.setTextString(node->token.string.substr(4));
+					}
+					if (negative)
+					{
+						node->token.string = '-' + node->token.string;
+
+						SquareRoot* right{ new SquareRoot(*exp, textSettings) };
+						textSettings.setTextString("");
+						Expression* left{ new Expression(Text(textSettings)) };
+
+						textSettings.setTextString("- ");
+						HorizontalConnector* con{ new HorizontalConnector(*left, *right, textSettings) };
+						delete left;
+						delete right;
+						delete exp;
+						return con;
+					}
+
+					SquareRoot* sqrt{ new SquareRoot(*exp, textSettings) };
+					delete exp;
+					return sqrt;
+				}
+			}
+
+			if (node->token.string.size() >= 3)
+			{
+				if (node->token.string.substr(0, 3) == "lim")
+				{
+					textSettings.setTextString("");
+					Text lowerBound{ textSettings };
+					Text upperBound{ textSettings };
+
+					std::string interval{ node->token.string.substr(3) };
+					lowerBound.setTextString(interval.substr(0, interval.find("to")));
+					upperBound.setTextString(interval.substr(interval.find("to") + 2));
+					if (upperBound.getTextString() == "inf")
+					{
+						upperBound.setTextString(L"\u221E");
+					}
+					
+					if (negative)
+					{
+						node->token.string = '-' + node->token.string;
+
+						textSettings.setTextString("");
+						Expression* left{ new Expression(Text(textSettings)) };
+						Limit* right{ new Limit(lowerBound, upperBound, *exp) };
+
+						textSettings.setTextString("-");
+						HorizontalConnector* con{ new HorizontalConnector(*left, *right, textSettings) };
+						delete left;
+						delete right;
+						delete exp;
+						return con;
+					}
+
+					Limit* limit{ new Limit(lowerBound, upperBound, *exp) };
+					delete exp;
+					return limit;
+				}
 			}
 
 			if (node->token.string.size() >= 3)
@@ -35,6 +105,21 @@ Expression* BuildExpression(Node* node, Text& textSettings)
 						lowerBound.setTextString(interval.substr(0, interval.find("to")));
 						upperBound.setTextString(interval.substr(interval.find("to") + 2));
 					}
+					if (negative)
+					{
+						node->token.string = '-' + node->token.string;
+
+						textSettings.setTextString("");
+						Expression* left{ new Expression(Text(textSettings)) };
+						Integral* right{ new Integral(lowerBound, upperBound, *exp) };
+
+						textSettings.setTextString("-");
+						HorizontalConnector* con{ new HorizontalConnector(*left, *right, textSettings) };
+						delete left;
+						delete right;
+						delete exp;
+						return con;
+					}
 
 					Integral* integral{ new Integral(lowerBound, upperBound, *exp) };
 					delete exp;
@@ -42,6 +127,7 @@ Expression* BuildExpression(Node* node, Text& textSettings)
 				}
 			}
 
+			if (negative) node->token.string = '-' + node->token.string;
 			textSettings.setTextString(node->token.string);
 			Function* function{ new Function(textSettings, *exp) };
 			delete exp;
@@ -49,17 +135,26 @@ Expression* BuildExpression(Node* node, Text& textSettings)
 		}
 		case Token::Type::Operator:
 		{
-			Expression* left{ BuildExpression(node->left, textSettings) };
+			textSettings.setTextString("");
+			Expression* left{ new Expression(Text(textSettings)) };
+			if (node->left)
+			{
+				delete left;
+				left = BuildExpression(node->left, textSettings);
+			}
 			Expression* right{ BuildExpression(node->right, textSettings) };
 
 			if (node->token.string == "^")
 			{
-				if (node->left->token.type == Token::Type::Operator)
+				if (node->left)
 				{
-					textSettings.setTextString("");
-					Expression* temp{ left };
-					left = new Function(textSettings, *left);
-					delete temp;
+					if (node->left->token.type == Token::Type::Operator)
+					{
+						textSettings.setTextString("");
+						Expression* temp{ left };
+						left = new Function(textSettings, *left);
+						delete temp;
+					}
 				}
 
 				Exponent* exponent{ new Exponent(*left, *right) };
@@ -82,11 +177,14 @@ Expression* BuildExpression(Node* node, Text& textSettings)
 			if (node->token.string == "*")
 			{
 				textSettings.setTextString("");
-				if (node->left->token.string == "-" || node->left->token.string == "+")
+				if (node->left)
 				{
-					Expression* temp{ left };
-					left = new Function(textSettings, *left);
-					delete temp;
+					if (node->left->token.string == "-" || node->left->token.string == "+")
+					{
+						Expression* temp{ left };
+						left = new Function(textSettings, *left);
+						delete temp;
+					}
 				}
 				if (node->right->token.string == "-" || node->right->token.string == "+")
 				{
@@ -137,8 +235,10 @@ int main()
 	window.setPosition({ 0,0 });
 	window.setFramerateLimit(60);
 
-	std::string expression{ "int0to5(sqrt(-sin((( 20 + 3) * x) / 7 ^ x * (log(y) - 5/x)) / (sqrt(y*(x/2))+1) * 3))" };
-	//std::string expression{ "int0to5(7^(sqrt(3)/5^2))" };
+	std::ifstream input("input.txt");
+	std::string expression;
+	std::getline(input, expression);
+
 	Node* root{ nullptr };
 
 	try
@@ -158,7 +258,7 @@ int main()
 
 	float size{ 40.f };
 	Text textSettings({ 0.f, size }); //only the height matters
-	textSettings.setTextFont("Resources/Lora.ttf");
+	textSettings.setTextFont("Resources/Lora.otf");
 	textSettings.setTextFillColor(sf::Color::Black);
 	textSettings.setFillColor(sf::Color::Transparent);
 
@@ -182,7 +282,7 @@ int main()
 	container.setFillColor(sf::Color::Transparent);
 	container.setOutlineColor(sf::Color::Black);
 	container.setOutlineThickness(5.f);
-	container.setCornerRadius(0.f);
+	container.setCornerRadius(170.f);
 	container.setPointCount(20);
 	container.setParent(window);
 	container.setRelativePosition(50.f, 60.f);

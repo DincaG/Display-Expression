@@ -33,8 +33,12 @@ Node* Parser::BuildAST(const std::vector<Token>& postfix)
 			node->right = stack.back();
 			stack.pop_back();
 
-			node->left = stack.back();
-			stack.pop_back();
+			if (!stack.empty())
+			{
+				node->left = stack.back();
+				stack.pop_back();
+			}
+			else node->left = nullptr;
 
 			node->token = postfix[i];
 			stack.push_back(node);
@@ -277,6 +281,31 @@ void Parser::ValidateTokens(std::vector<Token>& tokens)
 					tokens[i].string.erase(tokens[i].string.begin());
 				}
 
+				bool lim{ false };
+				if (tokens[i].string.size() >= 3)
+				{
+					if (tokens[i].string.substr(0, 3) == "lim")
+					{
+						lim = true;
+						if (tokens[i].string.size() > 3)
+						{
+							std::string interval{ tokens[i].string.substr(3) };
+							if (interval.find("to") == std::string::npos) throw "Limit interval ill defined";
+
+							std::string higherBound{ interval.substr(interval.find("to") + 2) };
+							std::string lowerBound{ interval.substr(0, interval.find("to")) };
+							if (higherBound.empty() || lowerBound.empty()) throw "Limit interval ill defined";
+						}
+						else throw "Limit ill defined";
+					}
+				}
+
+				bool sqrt{ false };
+				if (tokens[i].string.size() >= 4)
+				{
+					if (tokens[i].string.substr(0, 4) == "sqrt") sqrt = true;
+				}
+
 				bool integral{ false };
 				if (tokens[i].string.size() >= 3)
 				{
@@ -295,7 +324,7 @@ void Parser::ValidateTokens(std::vector<Token>& tokens)
 					}
 				}
 
-				if (tokens[i].string == functions[j] || integral)
+				if (tokens[i].string == functions[j] || integral || sqrt || lim)
 				{
 					tokens[i].type = Token::Type::Function;
 					if (i + 1 < tokens.size())
@@ -398,7 +427,6 @@ const std::vector<std::string> Parser::functions
 	"tan",
 	"log",
 	"ln",
-	"sqrt",
 	"abs"
 };
 
