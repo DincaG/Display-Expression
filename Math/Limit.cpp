@@ -63,6 +63,9 @@ void Limit::CopyInto(Expression** expression) const
 	upperBound->CopyInto(&((Limit*)(*expression))->upperBound);
 	((Limit*)(*expression))->upperBound->setParent(**expression);
 
+	((Limit*)(*expression))->lim = new Text{ *lim };
+	((Limit*)(*expression))->lim->setParent(**expression);
+
 	((Limit*)(*expression))->arrow = new Text{ *arrow };
 	((Limit*)(*expression))->arrow->setParent(**expression);
 
